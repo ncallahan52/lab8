@@ -1,0 +1,51 @@
+name: GitHub Flow Lab Automation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened]
+  push:
+    branches
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry Action
+        uses: snok/install-poetry@v1.4.1
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Run tests
+        run: poetry run pytest -v
+
+  comment_review:
+    needs: test
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add PR Comment
+        uses: mshick/add-pr-comment@v2.8.2
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ✅ All checks passed!
+            Please ensure your branch is up to date with **main**.
+            Run:
+            ```bash
+            git pull origin main
+            ```
+            Then push again.
