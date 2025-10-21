@@ -1,5 +1,5 @@
 [project]
-name = "lab8-github-flow"
+name = "adventure-game"
 version = "0.1.0"
 description = ""
 authors = [
@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "lab8_github_flow", from = "src"}]
+packages = [{include = "adventure-game", from = "src"}]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
