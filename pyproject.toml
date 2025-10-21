@@ -1,5 +1,5 @@
 [project]
-name = "adventure-game"
+name = "adventure"
 version = "0.1.0"
 description = ""
 authors = [
@@ -8,11 +8,12 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "rich (>=14.2.0,<15.0.0)"
+    "rich (>=14.2.0,<15.0.0)",
+    "pytest (>=8.4.2,<9.0.0)"
 ]
 
 [tool.poetry]
-packages = [{include = "adventure-game", from = "src"}]
+packages = [{include = "adventure", from = "src"}]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
