@@ -1,11 +1,6 @@
 name: GitHub Flow Lab Automation
 
-on:
-  pull_request:
-    branches: [main]
-    types: [opened]
-  push:
-    branches
+on: [pull_request, push]
 
 permissions:
   contents: write
