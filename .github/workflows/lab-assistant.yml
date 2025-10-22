@@ -1,6 +1,6 @@
 name: GitHub Flow Lab Automation
 
-on: [pull_request, push]
+on: [pull_request]
 
 permissions:
   contents: write
@@ -35,8 +35,7 @@ jobs:
       - name: Add PR Comment
         uses: mshick/add-pr-comment@v2.8.2
         with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
+          message: |
             ✅ All checks passed!
             Please ensure your branch is up to date with **main**.
             Run:
