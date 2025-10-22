@@ -1,19 +1,30 @@
-def intro(input_str: str):
-    print("You wake up in a dark forest. You can go left or right.")
+from adventure.utils import read_events_from_file
+import random
+
+def step(input_str: str, events):
     choice = input_str.strip().lower()
+    random_event = random.choice(events)
+
     if choice == "left":
-        return left_path()
+        return left_path(random_event)
     elif choice == "right":
-        return right_path()
+        return right_path(random_event)
     else:
         return "You stand still, unsure what to do. The forest swallows you."
 
-def left_path():
-    return "You walk left and find a mysterious glowing sword stuck in a stone."
+def left_path(event):
+    return "You walk left. " + event
 
-def right_path():
-    return "You walk right and encounter a talking squirrel who challenges you to a duel."
+def right_path(event):
+    return "You walk right. " + event
 
 if __name__ == "__main__":
-    choice = input("Which direction do you choose? (left/right): ")
-    print(intro(choice))
+    events = read_events_from_file('events.txt')
+
+    print("You wake up in a dark forest. You can go left or right.")
+    while True:
+        choice = input("Which direction do you choose? (left/right/exit): ")
+        if choice == 'exit':
+            break
+        
+        print(step(choice, events))
