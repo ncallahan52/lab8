@@ -73,7 +73,7 @@ jobs:
     if: needs.test.outputs.story_passed == 'true'
     runs-on: ubuntu-latest
     outputs:
-      approve: ${{ steps.find_comment.outputs.approve }}
+      approve: ${{ steps.check_approval.outputs.approve }}
     steps:
       - name: suggestion?
         uses: peter-evans/find-comment@v4
@@ -86,9 +86,12 @@ jobs:
         id: find_comment
         run: |
           if echo "${{ steps.find_suggestion.outputs.comment-body }}" | grep -q "<!--SUGGESTION: resolved-->"; then
-            echo "TYPE=resolved" >> $GITHUB_ENV
-            echo "approve=success" >> "$GITHUB_OUTPUT"
-          elif echo "${{ steps.find_suggestion.outputs.comment-body }}" | grep -q "<!--SUGGESTION: bold-->"; then
+            echo "RESOLVED=true" >> $GITHUB_ENV
+          else
+            echo "RESOLVED=false" >> $GITHUB_ENV
+          fi
+
+          if echo "${{ steps.find_suggestion.outputs.comment-body }}" | grep -q "<!--SUGGESTION: bold-->"; then
             echo "TYPE=bold" >> $GITHUB_ENV
             echo "approve=failed" >> "$GITHUB_OUTPUT"
           elif echo "${{ steps.find_suggestion.outputs.comment-body }}" | grep -q "<!--SUGGESTION: exit-->"; then
@@ -96,6 +99,17 @@ jobs:
             echo "approve=failed" >> "$GITHUB_OUTPUT"
           else
             echo "TYPE=none" >> $GITHUB_ENV
+            echo "approve=failed" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: check approval
+        id: check_approval
+        run: |
+          if [[ "$TYPE" == "bold" && "${{ needs.test.outputs.prompt_bold_passed }}" == "true" && "$RESOLVED" == "true" ]]; then
+            echo "approve=success" >> "$GITHUB_OUTPUT"
+          elif [[ "$TYPE" == "exit" && "${{ needs.test.outputs.exit_message_passed }}" == "true" && "$RESOLVED" == "true" ]]; then
+            echo "approve=success" >> "$GITHUB_OUTPUT"
+          else
             echo "approve=failed" >> "$GITHUB_OUTPUT"
           fi
 
