@@ -23,5 +23,9 @@ def test_bold_prompt():
     )
     
     stdout = process.stdout
-    pattern = re.compile(r"\x1b\[.*Which direction do you choose.*\x1b\[", re.DOTALL)
-    assert pattern.search(stdout)
+    pattern = re.compile(r"\x1b\[1m.*Which direction do you choose.*\x1b\[", re.DOTALL)
+    if not pattern.search(stdout):
+        pattern = re.compile(r"\x1b\[1;[0-9]*m.*Which direction do you choose.*\x1b\[", re.DOTALL)
+        if not pattern.search(stdout):
+            pattern = re.compile(r"\x1b\[1;[0-9]*;[0-9]*m.*Which direction do you choose.*\x1b\[", re.DOTALL)
+            assert pattern.search(stdout)
