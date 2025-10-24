@@ -141,7 +141,9 @@ jobs:
           message: |
             ✅ test_story.py passed
             ✅ test_bold_prompt.py passed
-            Oh, there's a new commit in main branch, please update your branch to keep up to date with the main branch.
+            🥳 Congratulations! All tests passed!
+
+            Oh, wait! 😼 There's a new commit in main branch, please update your branch to keep up to date with the main branch.
             <!--SUGGESTION: resolved-->
 
       - name: follow-up check exit - success
@@ -153,7 +155,9 @@ jobs:
           message: |
             ✅ test_story.py passed
             ✅ test_exit_message.py passed
-            Oh, there's a new commit in main branch, please update your branch to keep up to date with the main branch.
+            🥳 Congratulations! All tests passed!
+
+            Oh, wait! 😼 There's a new commit in main branch, please update your branch to keep up to date with the main branch.
             <!--SUGGESTION: resolved-->
 
       - name: checkout up-to-date
