@@ -1,6 +1,6 @@
 name: Lab Reviewer
 
-on: [pull_request_target]
+on: [pull_request]
 
 permissions:
   contents: write
@@ -72,6 +72,8 @@ jobs:
     needs: test
     if: needs.test.outputs.story_passed == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      approve: ${{ steps.find_comment.outputs.approve }}
     steps:
       - name: suggestion?
         uses: peter-evans/find-comment@v4
@@ -80,15 +82,21 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: "<!--SUGGESTION:"
           direction: last
-      - run: |
+      - name: find comment
+        id: find_comment
+        run: |
           if echo "${{ steps.find_suggestion.outputs.comment-body }}" | grep -q "<!--SUGGESTION: resolved-->"; then
             echo "TYPE=resolved" >> $GITHUB_ENV
+            echo "approve=success" >> "$GITHUB_OUTPUT"
           elif echo "${{ steps.find_suggestion.outputs.comment-body }}" | grep -q "<!--SUGGESTION: bold-->"; then
             echo "TYPE=bold" >> $GITHUB_ENV
+            echo "approve=failed" >> "$GITHUB_OUTPUT"
           elif echo "${{ steps.find_suggestion.outputs.comment-body }}" | grep -q "<!--SUGGESTION: exit-->"; then
             echo "TYPE=exit" >> $GITHUB_ENV
+            echo "approve=failed" >> "$GITHUB_OUTPUT"
           else
             echo "TYPE=none" >> $GITHUB_ENV
+            echo "approve=failed" >> "$GITHUB_OUTPUT"
           fi
 
       - name: follow-up check bold
@@ -160,34 +168,16 @@ jobs:
             Oh, wait! 😼 There's a new commit in main branch, please update your branch to keep up to date with the main branch.
             <!--SUGGESTION: resolved-->
 
-      - name: checkout up-to-date
+      - name: end of Lab
         if: env.TYPE == 'resolved'
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
-
-      - name: check up-to-date
-        if: env.TYPE == 'resolved'
-        id: check_sync 
-        run: |
-          git fetch origin main
-          BASE=origin/main
-          HEAD=$(git rev-parse HEAD)
-          if git merge-base --is-ancestor $BASE $HEAD; then
-            echo "up_to_date=true" >> $GITHUB_OUTPUT
-          else
-            echo "up_to_date=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: comment about behind
-        if: steps.check_sync.outputs.up_to_date == 'false'
         uses: mshick/add-pr-comment@v2.8.2
         with:
           allow-repeats: true
           refresh-message-position: true
           message: |
-            Your branch is still behind the main branch! 😈 please update your branch to keep up to date with the main branch.
+            Everything seems all right now! Your branch is up to date with the main. I'll approve the PR (pull request) right now.
+
+            Once it's merged, delete the branch! 👇👇👇
 
       - name: think
         if: env.TYPE == 'none'
@@ -224,3 +214,32 @@ jobs:
             ${{ env.COMMENT == 'bold' && 'Great work! But I would like to see "Which direction do you choose?" in bold, can you adjust your code to do that?' || 'Great work! But I would like to see a goodbye message after user enters `exit`, can you adjust your code to do that?' }}
             ${{ env.COMMENT == 'BOLD' && '<!--SUGGESTION: bold-->' || '<!--SUGGESTION: exit-->' }}
           
+  auto_merge:
+    needs: [suggestion]
+    if: needs.suggestion.outputs.approve == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: bot reviewer checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Approve Pull Request
+        uses: juliangruber/approve-pull-request-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ github.event.pull_request.number }}
+
+      - name: merge
+        uses: juliangruber/merge-pull-request-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ github.event.pull_request.number }}
+          method: squash
+
+      - name: confirm merge
+        run: echo "✅ Pull request approved and merged"
