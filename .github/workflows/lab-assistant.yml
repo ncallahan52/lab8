@@ -75,6 +75,21 @@ jobs:
     outputs:
       approve: ${{ steps.check_approval.outputs.approve }}
     steps:
+      - name: decision?
+        id: find_decision
+        uses: peter-evans/find-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "<!--DECISION:"
+          direction: last
+      - name: find decision
+        run: |
+          if echo "${{ steps.find_decision.outputs.comment-body }}" | grep -q "<!--DECISION: resolved-->"; then
+            echo "RESOLVED=true" >> $GITHUB_ENV
+          else
+            echo "RESOLVED=false" >> $GITHUB_ENV
+          fi
+
       - name: suggestion?
         uses: peter-evans/find-comment@v4
         id: find_suggestion
@@ -83,23 +98,13 @@ jobs:
           body-includes: "<!--SUGGESTION:"
           direction: last
       - name: find comment
-        id: find_comment
         run: |
-          if echo "${{ steps.find_suggestion.outputs.comment-body }}" | grep -q "<!--SUGGESTION: resolved-->"; then
-            echo "RESOLVED=true" >> $GITHUB_ENV
-          else
-            echo "RESOLVED=false" >> $GITHUB_ENV
-          fi
-
           if echo "${{ steps.find_suggestion.outputs.comment-body }}" | grep -q "<!--SUGGESTION: bold-->"; then
             echo "TYPE=bold" >> $GITHUB_ENV
-            echo "approve=failed" >> "$GITHUB_OUTPUT"
           elif echo "${{ steps.find_suggestion.outputs.comment-body }}" | grep -q "<!--SUGGESTION: exit-->"; then
             echo "TYPE=exit" >> $GITHUB_ENV
-            echo "approve=failed" >> "$GITHUB_OUTPUT"
           else
             echo "TYPE=none" >> $GITHUB_ENV
-            echo "approve=failed" >> "$GITHUB_OUTPUT"
           fi
 
       - name: check approval
@@ -168,7 +173,7 @@ jobs:
             🥳 Congratulations! All tests passed!
 
             Oh, wait! 😼 There's a new commit in main branch, please update your branch to keep up to date with the main branch.
-            <!--SUGGESTION: resolved-->
+            <!--DECISION: resolved-->
 
       - name: follow-up check exit - success
         if: env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true'
@@ -182,7 +187,7 @@ jobs:
             🥳 Congratulations! All tests passed!
 
             Oh, wait! 😼 There's a new commit in main branch, please update your branch to keep up to date with the main branch.
-            <!--SUGGESTION: resolved-->
+            <!--DECISION: resolved-->
 
       - name: end of Lab
         if: env.TYPE == 'resolved'
