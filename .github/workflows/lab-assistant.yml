@@ -123,6 +123,7 @@ jobs:
             ✅ test_story.py passed
             ❌ test_bold_prompt.py failed
             Please update your code to make sure the prmopt "Which direction do you choose?" is in bold. If you think this auto-test has incorrect results, please reach out to the instructor to manually check your code.
+            <!--SUGGESTION: bold-->
 
       - name: follow-up check exit
         if: env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'false'
@@ -134,6 +135,7 @@ jobs:
             ✅ test_story.py passed
             ❌ test_exit_message.py failed
             Please update your code to make sure some goodbye message is printed after the user enters exit. If you think this auto-test has incorrect results, please reach out to the instructor to manually check your code.
+            <!--SUGGESTION: exit-->
 
       - name: bot mate checkout
         if: (env.TYPE == 'bold' && needs.test.outputs.prompt_bold_passed == 'true') || env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true'
@@ -226,7 +228,7 @@ jobs:
           message: |
             ✅ test_story.py passed
             ${{ env.COMMENT == 'bold' && 'Great work! But I would like to see "Which direction do you choose?" in bold, can you adjust your code to do that?' || 'Great work! But I would like to see a goodbye message after user enters `exit`, can you adjust your code to do that?' }}
-            ${{ env.COMMENT == 'BOLD' && '<!--SUGGESTION: bold-->' || '<!--SUGGESTION: exit-->' }}
+            ${{ env.COMMENT == 'bold' && '<!--SUGGESTION: bold-->' || '<!--SUGGESTION: exit-->' }}
           
   auto_merge:
     needs: [suggestion]
