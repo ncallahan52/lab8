@@ -1,8 +1,7 @@
 from adventure.utils import read_events_from_file
 import random
 
-def step(input_str: str, events):
-    choice = input_str.strip().lower()
+def step(choice: str, events):
     random_event = random.choice(events)
 
     if choice == "left":
@@ -24,6 +23,7 @@ if __name__ == "__main__":
     print("You wake up in a dark forest. You can go left or right.")
     while True:
         choice = input("Which direction do you choose? (left/right/exit): ")
+        choice = choice.strip().lower()
         if choice == 'exit':
             break
         

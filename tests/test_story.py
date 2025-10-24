@@ -1,19 +1,20 @@
-from adventure.story import intro
+from adventure.story import step
 import pytest
 
 @pytest.mark.parametrize(
     # fmt: off
     "input_str, expected_output",
     [
-        ('Right', 'right'),
+        ('Right', 'still'),
         ('right', 'right'),
-        ('RIGHT',  'right'),
-        ('Left', 'left'),
+        ('RIGHT',  'still'),
+        ('Left', 'still'),
         ('left', 'left'),
-        ('LEFT',  'left'),
+        ('LEFT',  'still'),
     ],
     # fmt: on
 )
-def test_intro(input_str, expected_output):
-    result = intro(input_str)
+def test_step(input_str, expected_output):
+    result = step(input_str, ["event1", "event2"])
     assert expected_output in result.lower()
+
