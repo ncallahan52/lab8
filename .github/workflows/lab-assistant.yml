@@ -143,7 +143,7 @@ jobs:
             <!--SUGGESTION: exit-->
 
       - name: bot mate checkout
-        if: (env.TYPE == 'bold' && needs.test.outputs.prompt_bold_passed == 'true') || env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true'
+        if: env.RESOLVED == 'false' && ( (env.TYPE == 'bold' && needs.test.outputs.prompt_bold_passed == 'true') || (env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true') )
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -151,7 +151,7 @@ jobs:
           fetch-depth: 0
 
       - name: commit to main
-        if: (env.TYPE == 'bold' && needs.test.outputs.prompt_bold_passed == 'true') || (env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true')
+        if: env.RESOLVED == 'false' && ( (env.TYPE == 'bold' && needs.test.outputs.prompt_bold_passed == 'true') || (env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true') )
         run: |
           git config user.name "bot mate"
           git config user.email "botmate@users.noreply.github.com"
@@ -162,7 +162,7 @@ jobs:
           git push origin main
 
       - name: follow-up check bold - success
-        if: env.TYPE == 'bold' && needs.test.outputs.prompt_bold_passed == 'true'
+        if: env.RESOLVED == 'false' && env.TYPE == 'bold' && needs.test.outputs.prompt_bold_passed == 'true'
         uses: mshick/add-pr-comment@v2.8.2
         with:
           allow-repeats: true
@@ -176,7 +176,7 @@ jobs:
             <!--DECISION: resolved-->
 
       - name: follow-up check exit - success
-        if: env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true'
+        if: env.RESOLVED == 'false' && env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true'
         uses: mshick/add-pr-comment@v2.8.2
         with:
           allow-repeats: true
@@ -190,7 +190,7 @@ jobs:
             <!--DECISION: resolved-->
 
       - name: end of Lab
-        if: env.TYPE == 'resolved'
+        if: env.RESOLVED == 'true'
         uses: mshick/add-pr-comment@v2.8.2
         with:
           allow-repeats: true
