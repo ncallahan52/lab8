@@ -201,6 +201,7 @@ jobs:
         run: git fetch origin main
 
       - name: working branch up-to-date?
+        if: env.RESOLVED == 'true' && ( ( env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true' ) || (env.TYPE == 'bold' && needs.test.outputs.prompt_bold_passed == 'true') )
         id: check_sync
         run: |
           BEHIND_COUNT=$(git rev-list --count HEAD..origin/main)
