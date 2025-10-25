@@ -189,8 +189,25 @@ jobs:
             Oh, wait! 😼 There's a new commit in main branch, please update your branch to keep up to date with the main branch.
             <!--DECISION: resolved-->
 
-      - name: end of Lab
+      - name: last check
         if: env.RESOLVED == 'true' && ( ( env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true' ) || (env.TYPE == 'bold' && needs.test.outputs.prompt_bold_passed == 'true') )
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+          
+      - name: fetch main
+        if: env.RESOLVED == 'true' && ( ( env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true' ) || (env.TYPE == 'bold' && needs.test.outputs.prompt_bold_passed == 'true') )
+        run: git fetch origin main
+
+      - name: working branch up-to-date?
+        id: check_sync
+        run: |
+          BEHIND_COUNT=$(git rev-list --count HEAD..origin/main)
+          echo "behind_count=$BEHIND_COUNT" >> $GITHUB_OUTPUT
+          
+      - name: end of Lab
+        if: env.RESOLVED == 'true' && ( ( env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true' ) || (env.TYPE == 'bold' && needs.test.outputs.prompt_bold_passed == 'true') ) && steps.check_sync.outputs.behind_count == '0'
         uses: mshick/add-pr-comment@v2.8.2
         with:
           allow-repeats: true
@@ -199,7 +216,17 @@ jobs:
             Everything seems all right now! Your branch is up to date with the main. I'll approve the PR (pull request) right now.
 
             Once it's merged, delete the branch! 👇👇👇
-
+        
+      - name: keep updating
+        if: env.RESOLVED == 'true' && ( ( env.TYPE == 'exit' && needs.test.outputs.exit_message_passed == 'true' ) || (env.TYPE == 'bold' && needs.test.outputs.prompt_bold_passed == 'true') ) && steps.check_sync.outputs.behind_count != '0'
+        uses: mshick/add-pr-comment@v2.8.2
+        with:
+          allow-repeats: true
+          refresh-message-position: true
+          message: |
+            ⚠️ The **main** branch has new commits that your branch doesn't have.  
+            Please merge or rebase **main** into your branch to stay up to date.
+            
       - name: think
         if: env.TYPE == 'none'
         id: choose
