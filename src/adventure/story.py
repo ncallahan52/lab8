@@ -41,8 +41,9 @@ if __name__ == "__main__":
     console.print(Rule(style="bright_black"))
 
     while True:
+        # PR feedback
         choice = Prompt.ask(
-            "[bold magenta]Which way do you travel?[/bold magenta]",
+            "[bold]Which direction do you choose?[/bold]",
             choices=["left", "right", "exit"],
             show_choices=False
         )
